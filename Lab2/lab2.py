@@ -13,7 +13,7 @@ def rgb_to_halftone(img):
 
 photo = Image.open("Photos\\test.jpg")
 
-ph_filter = ZSUv()# /7
+ph_filter = Gauss_11x11()# /7
 
 print(ph_filter)
 
@@ -57,29 +57,3 @@ except FileExistsError:
     pass
 
 photo.save('Results\\test_result.jpg')
-
-"""
-Trash
-# print(working_ar[..., 2])
-
-# for i in range (0, 3):
-#     for j in range(0, 3):
-#         print(i, j, ph_filter[i][j])
-#         # print(ph_filter[i][j])
-
-
-    #         sum_by_filter = 0
-#         for i in range (0, 3):
-#             for j in range(0, 3):
-#                 sum_by_filter += working_ar_l[(row + i - 1) % ar_size][(col + j - 1) % ar_size] * ph_filter[i][j]
-#         filtered_ar[row][col] = sum_by_filter
-
-# for i in range(1, len(working_ar_l) - 1):
-#     for j in range(1, len(working_ar_l[i]) - 1):
-#         filtered_pixel = np.sum(working_ar_l[i - 1:i + 2, j - 1:j + 2] * ph_filter)
-#         filtered_ar[i, j] = np.uint8(np.clip(filtered_pixel, 0, 255))
-
-
-# print(working_ar_l)
-# print(filtered_ar)
-"""
