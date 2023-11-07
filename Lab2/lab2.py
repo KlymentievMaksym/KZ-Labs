@@ -14,9 +14,9 @@ def rgb_to_halftone(img):
 photo = Image.open("Photos\\test.jpg")
 
 ph_filter = np.array([
-    [0, -1, 0,],
-    [-1, 5, -1,],
-    [0, -1, 0,],
+    [-2, -1, 0,],
+    [-1, 0, 1,],
+    [0, 1, 2,],
 ], dtype=np.float32)# /7
 
 working_ar = np.array(photo)
@@ -28,7 +28,7 @@ filtered_ar = np.zeros_like(working_ar)
 
 ar_size = len(working_ar_l)
 
-height, width, channels = working_ar.shape
+height, width = working_ar_l.shape
 height_fl, width_fl = ph_filter.shape
 # print(working_ar[..., 2])
 
@@ -40,11 +40,11 @@ height_fl, width_fl = ph_filter.shape
 height_limit = height_fl - 2
 width_limit = width_fl - 2
 
-for channel in range(channels):
-    for row in range(height_limit, height - height_limit):
-        for col in range(height_limit, width - height_limit):
-            matrix = working_ar[row - height_limit:row + 2, col - width_limit:col + 2, channel]
-            filtered_ar[row, col, channel] = np.sum(matrix * ph_filter)# %256
+# for channel in range(channels):
+for row in range(height_limit, height - height_limit):
+    for col in range(height_limit, width - height_limit):
+        matrix = working_ar_l[row - height_limit:row + 2, col - width_limit:col + 2]
+        filtered_ar[row, col] = np.sum(matrix * ph_filter)# %256
 
 
     #         sum_by_filter = 0
