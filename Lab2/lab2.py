@@ -14,9 +14,9 @@ def rgb_to_halftone(img):
 photo = Image.open("Photos\\test.jpg")
 
 ph_filter = np.array([
-    [-1, -1, -1],
-    [-1, 8, -1],
-    [-1, -1, -1]
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0]
 ], dtype=np.float32)
 
 working_ar = np.array(photo)
@@ -24,22 +24,22 @@ working_ar_l = rgb_to_halftone(working_ar).astype(np.uint8)
 print(working_ar.shape)
 print(working_ar_l.shape)
 
-filtered_ar = np.zeros_like(working_ar_l)
+filtered_ar = np.zeros_like(working_ar)
 
 ar_size = len(working_ar_l)
+
+height, width, channels = working_ar.shape
 
 
 # for i in range (0, 3):
 #     for j in range(0, 3):
 #         print(i, j, ph_filter[i][j])
 #         # print(ph_filter[i][j])
-
-for row in range(1, ar_size-1):
-    for col in range(1, ar_size):
-        if row >= ar_size - 4:
-            matrix = working_ar_l[row - 1:row + 2, col - 1:col + 2]
-            print(matrix, ph_filter, matrix * ph_filter, np.sum(matrix * ph_filter))
-            filtered_ar[row][col] = np.sum(matrix * ph_filter)
+for channel in range(channels):
+    for row in range(1, height - 1):
+        for col in range(1, width - 1):
+            matrix = working_ar[row - 1:row + 2, col - 1:col + 2, channel]
+            filtered_ar[row, col, channel] = np.sum(matrix * ph_filter)# %256
 
     #         sum_by_filter = 0
 #         for i in range (0, 3):
@@ -58,11 +58,11 @@ print(filtered_ar)
 
 filtered_ar = np.clip(filtered_ar, 0, 255).astype(np.uint8)
 
-# photo = Image.fromarray(filtered_ar)
+photo = Image.fromarray(filtered_ar)
 
-# try:
-#     os.mkdir('Results\\')
-# except FileExistsError:
-#     pass
+try:
+    os.mkdir('Results\\')
+except FileExistsError:
+    pass
 
-# photo.save('Results\\test_result.jpg')
+photo.save('Results\\test_result.jpg')
