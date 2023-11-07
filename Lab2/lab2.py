@@ -14,14 +14,10 @@ def rgb_to_halftone(img):
 photo = Image.open("Photos\\test.jpg")
 
 ph_filter = np.array([
-    [ 0, 0, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 0, 0 ],
-    [ 1, 1, 1, 1, 1, 1, 1 ],
-    [ 0, 0, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 0, 0 ],
-], dtype=np.float32)/7
+    [0, -1, 0,],
+    [-1, 5, -1,],
+    [0, -1, 0,],
+], dtype=np.float32)# /7
 
 working_ar = np.array(photo)
 working_ar_l = rgb_to_halftone(working_ar).astype(np.uint8)
