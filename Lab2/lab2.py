@@ -14,10 +14,14 @@ def rgb_to_halftone(img):
 photo = Image.open("Photos\\test.jpg")
 
 ph_filter = np.array([
-    [0, 0, 0],
-    [0, 1, 0],
-    [0, 0, 0]
-], dtype=np.float32)
+    [0, 0, 1, 2, 1, 0, 0],
+    [0, 3, 13, 22, 13, 3, 0],
+    [1, 13, 59, 97, 59, 13, 1],
+    [2, 22, 97, 159, 97, 22, 2],
+    [1, 13, 59, 97, 59, 13, 1],
+    [0, 3, 13, 22, 13, 3, 0],
+    [0, 0, 1, 2, 1, 0, 0],
+], dtype=np.float32)/1003
 
 working_ar = np.array(photo)
 working_ar_l = rgb_to_halftone(working_ar).astype(np.uint8)
@@ -29,17 +33,23 @@ filtered_ar = np.zeros_like(working_ar)
 ar_size = len(working_ar_l)
 
 height, width, channels = working_ar.shape
-
+height_fl, width_fl = ph_filter.shape
+# print(working_ar[..., 2])
 
 # for i in range (0, 3):
 #     for j in range(0, 3):
 #         print(i, j, ph_filter[i][j])
 #         # print(ph_filter[i][j])
+
+height_limit = height_fl - 2
+width_limit = width_fl - 2
+
 for channel in range(channels):
-    for row in range(1, height - 1):
-        for col in range(1, width - 1):
-            matrix = working_ar[row - 1:row + 2, col - 1:col + 2, channel]
+    for row in range(height_limit, height - height_limit):
+        for col in range(height_limit, width - height_limit):
+            matrix = working_ar[row - height_limit:row + 2, col - width_limit:col + 2, channel]
             filtered_ar[row, col, channel] = np.sum(matrix * ph_filter)# %256
+
 
     #         sum_by_filter = 0
 #         for i in range (0, 3):
@@ -53,8 +63,8 @@ for channel in range(channels):
 #         filtered_ar[i, j] = np.uint8(np.clip(filtered_pixel, 0, 255))
 
 
-print(working_ar_l)
-print(filtered_ar)
+# print(working_ar_l)
+# print(filtered_ar)
 
 filtered_ar = np.clip(filtered_ar, 0, 255).astype(np.uint8)
 
