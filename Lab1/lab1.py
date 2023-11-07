@@ -63,8 +63,6 @@ def find_optimal_treshhold(treshholds):
 
     return max_treshold_index
 
-black_background = Image.new("L", (960, 1280), 0)
-
 txt1 = Image.open("Photos\Text1.jpg")
 txt2 = Image.open("Photos\Text2.jpg")
 img1 = Image.open("Photos\Img1.jpg")
@@ -115,10 +113,10 @@ bw_img_img1 = ht_img_img1.point(lambda i:255 if i>optimal_treshhold_img1 else 0)
 bw_img_img2 = ht_img_img2.point(lambda i:255 if i>optimal_treshhold_img2 else 0)
 # bw_img_img2.show()
 
-rslt_img_img1 = Image.composite(black_background, img1, bw_img_img1)
-rslt_img_img2 = Image.composite(black_background, img2, bw_img_img2)
-rslt_img_txt1 = Image.composite(black_background, txt1, bw_img_txt1)
-rslt_img_txt2 = Image.composite(black_background, txt2, bw_img_txt2)
+rslt_img_img1 = Image.composite(Image.new("L", img1.size, 0), img1, bw_img_img1)
+rslt_img_img2 = Image.composite(Image.new("L", img2.size, 0), img2, bw_img_img2)
+rslt_img_txt1 = Image.composite(Image.new("L", txt1.size, 0), txt1, bw_img_txt1)
+rslt_img_txt2 = Image.composite(Image.new("L", txt2.size, 0), txt2, bw_img_txt2)
 # rslt_img_txt1.show()
 
 try:
