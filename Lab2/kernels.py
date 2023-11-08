@@ -1,16 +1,23 @@
 import numpy as np
 
 def ZSUv():
-    x_shift = 10
-    y_shift = 20
-    return [x_shift, y_shift]
+    # x_shift = 10
+    # y_shift = 20
+    # return [x_shift, y_shift]
+    return np.array([
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 2]
+        ], dtype=np.uint8)
 
 def Inversia():
     return np.array([
         [0, 0, 0],
         [0, -1, 0],
         [0, 0, 0]
-        ], dtype=np.uint8)
+        ], dtype=np.float32)
 
 def Gauss_11x11():
     return np.array([
@@ -43,25 +50,25 @@ def Rizkist():
         [0, -1, 0,],
         [-1, 5, -1,],
         [0, -1, 0,],
-        ], dtype=np.uint8)
+        ], dtype=np.float32)
 
 def Sobel_diag():
     return np.array([
         [-2, -1, 0,],
         [-1, 0, 1,],
         [0, 1, 2,],
-        ], dtype=np.uint8)
+        ], dtype=np.float32)
 
 def Border():
     return np.array([
         [-1, -1, -1,],
         [-1, 8, -1,],
         [-1, -1, -1,],
-        ], dtype=np.uint8)
+        ], dtype=np.float32)
 
 def My_Kernel():
     return np.array([
         [-21, -1, 41,],
         [-1, 8, -1,],
         [41, -1, -21,],
-        ], dtype=np.uint8)
+        ], dtype=np.float32)
