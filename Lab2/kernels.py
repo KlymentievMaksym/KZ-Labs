@@ -10,7 +10,7 @@ def ZSUv():
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1]
-        ], dtype=np.uint8)
+        ], dtype=np.float32)
 
 def Inversia():
     return np.array([
@@ -68,7 +68,7 @@ def Border():
 
 def My_Kernel():
     return np.array([
-        [-21, -1, 41,],
+        [-21, -1, 11,],
         [-1, 8, -1,],
-        [41, -1, -21,],
+        [11, -1, -21,],
         ], dtype=np.float32)
