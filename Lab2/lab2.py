@@ -15,6 +15,8 @@ def rgb_to_halftone(img):
 def do_multiplications(working_ar, ph_filter):
     filtered_ar = np.zeros_like(working_ar)
     # print(filtered_ar.dtype)
+    # print(working_ar.shape)
+    # print(ph_filter.shape)
     if type(ph_filter) == np.ndarray:
         
         try:
@@ -124,7 +126,7 @@ def clip(filtered_ar1):
     
 ################################################
 photo_or = Image.open("Photos\\test1.jpg")
-ph_filter = Inversia()
+ph_filter = ZSUv()
 ################################################
 print()
 photo = np.array(photo_or, np.float64)
@@ -135,7 +137,7 @@ except FileExistsError:
 ################################################
 filtered_ar1 = do_multiplications(photo, ph_filter)
 # print(np.any(filtered_ar1 < -255), np.any(filtered_ar1 > 255))
-if np.sum(ph_filter) == 0 or np.all(ph_filter  == Rizkist()):
+if np.sum(ph_filter) == 0 or (ph_filter.shape == Rizkist().shape and np.all(ph_filter  == Rizkist())):
     filtered_ar1 = clip(filtered_ar1)
 else:
     filtered_ar1 = scale(filtered_ar1)
