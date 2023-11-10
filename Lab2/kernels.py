@@ -4,13 +4,17 @@ def ZSUv():
     # x_shift = 10
     # y_shift = 20
     # return [x_shift, y_shift]
-    return np.array([
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1]
-        ], dtype=np.float32)
+    # return np.array([
+    #     [0, 0, 0, 0, 0],
+    #     [0, 0, 0, 0, 0],
+    #     [0, 0, 0, 0, 10],
+    #     [0, 0, 0, 10, 20],
+    #     [0, 0, 10, 20, 30]
+    #     ], dtype=np.float32)
+    kernel = np.zeros((20, 20), dtype=np.float32)
+    kernel[-1, -1] = 1
+    # print(kernel)
+    return kernel
 
 def Inversia():
     return np.array([
