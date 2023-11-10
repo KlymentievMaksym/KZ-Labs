@@ -81,6 +81,15 @@ def do_multiplications(working_ar, ph_filter):
             height_limit = height_fl - 2
             width_limit = width_fl - 2
             
+            class Codes:
+                height_25 = height//4
+                height_50 = height//2
+                height_75 = (3*height)//4
+                height_100 = height - height_limit - 1
+                red = 0
+                green = 1
+                blue = 2
+            
             for channel in range(channels):
                 for row in range(height_limit, height - height_limit):
                     
@@ -114,7 +123,7 @@ def clip(filtered_ar1):
     return filtered_ar1
     
 ################################################
-photo_or = Image.open("Photos\\test.webp")
+photo_or = Image.open("Photos\\test1.jpg")
 ph_filter = Inversia()
 ################################################
 print()
@@ -126,7 +135,7 @@ except FileExistsError:
 ################################################
 filtered_ar1 = do_multiplications(photo, ph_filter)
 # print(np.any(filtered_ar1 < -255), np.any(filtered_ar1 > 255))
-if np.sum(ph_filter) == 0:
+if np.sum(ph_filter) == 0 or np.all(ph_filter  == Rizkist()):
     filtered_ar1 = clip(filtered_ar1)
 else:
     filtered_ar1 = scale(filtered_ar1)
