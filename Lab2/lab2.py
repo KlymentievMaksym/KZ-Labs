@@ -57,9 +57,12 @@ def do_multiplications(working_ar, ph_filter):
                             print("75% Done")
                         case Codes.height_100:
                             print("100% Done")
-                            
+                    
+                    row_start = row - height_limit
+                    row_finish = row + 2
+                    
                     for col in range(height_limit, width - height_limit):
-                        matrix = working_ar[row - height_limit:row + 2, col - width_limit:col + 2, channel]
+                        matrix = working_ar[row_start:row_finish, col - width_limit:col + 2, channel]
                         npsum = np.sum(matrix * ph_filter)
                         filtered_ar[row, col, channel] = npsum
                 
@@ -105,15 +108,18 @@ def do_multiplications(working_ar, ph_filter):
                         case Codes.height_100:
                             print("100% Done")
                     
+                    row_start = row - height_limit
+                    row_finish = row + 2
+                    
                     for col in range(height_limit, width - height_limit):
-                        matrix = working_ar[row - height_limit:row + 2, col - width_limit:col + 2]
+                        matrix = working_ar[row_start:row_finish, col - width_limit:col + 2]
                         filtered_ar[row, col] = np.sum(matrix * ph_filter)
     return filtered_ar
 
 
 def scale(filtered_ar1):
     print("Scaling array...")
-    maximum = np.max(filtered_ar1)
+    # maximum = np.max(filtered_ar1)
     minimum = np.min(filtered_ar1)
     filtered_ar1 = (255*(filtered_ar1 - minimum)/np.ptp(filtered_ar1)).astype(np.uint8)
     return filtered_ar1
@@ -125,8 +131,8 @@ def clip(filtered_ar1):
     return filtered_ar1
     
 ################################################
-photo_or = Image.open("Photos\\test1.jpg")
-ph_filter = ZSUv()
+photo_or = Image.open("Photos\\test.jpg")
+ph_filter = Inversia()
 ################################################
 print()
 photo = np.array(photo_or, np.float64)
