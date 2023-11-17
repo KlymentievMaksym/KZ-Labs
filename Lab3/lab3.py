@@ -1,5 +1,5 @@
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageShow
 import os
 import datetime as dtime
 
@@ -14,39 +14,77 @@ def eq(ar1, ar2):
     # print(a1, a2, a3, lim1, lim2, lim3)
     # print(b1, b2, b3)
     
-    if lim1 and lim2 and lim3: return True
+    if not lim1 or not lim2 or not lim3: return False
+    return True
+
+
+def h_eq(ar1, ar2):
+    a1, a2, a3 = ar1
+    b1, b2, b3 = ar2
+    
+    lim1 = (a1 and b1 or not b1)
+    lim2 = (a2 and b2 or not b2)
+    lim3 = (a3 and b3 or not b3)
+    
+    # print(a1, a2, a3, lim1, lim2, lim3)
+    # print(b1, b2, b3)
+    
+    if lim1 or lim2 or lim3: return True
     return False
+
 
 def fit(ar3x3):
     # print(ar3x3, fl, np.all(ar3x3 == fl))
     a = np.equal(1, fl)
     b = np.equal(255, ar3x3)
-    # result = []
+    result = []
     
-    # if not np.any(a[:, 0]):
-    #     pass
-    # else:
-    #     result.append(eq(a[:, 0], b[:, 0]))
+    if not np.any(a[:, 0]):
+        pass
+    else:
+        result.append(eq(b[:, 0], a[:, 0]))
     
-    # if not np.any(a[:, 1]):
-    #     pass
-    # else:
-    #     result.append(eq(a[:, 1], b[:, 1]))
+    if not np.any(a[:, 1]):
+        pass
+    else:
+        result.append(eq(b[:, 1], a[:, 1]))
         
-    # if not np.any(a[:, 2]):
-    #     pass
-    # else:
-    #     result.append(eq(a[:, 2], b[:, 2]))
+    if not np.any(a[:, 2]):
+        pass
+    else:
+        result.append(eq(b[:, 2], a[:, 2]))
         
     # print(result, np.all(result))
     
-    result = np.logical_or(a, b)
+    # result = np.logical_or(a, b)
     if np.all(result): return True
     return False
 
 
 def hit(ar3x3):
-    if np.any(ar3x3 == fl): return True
+    a = np.equal(1, fl)
+    b = np.equal(255, ar3x3)
+    result = []
+    
+    if not np.any(a[:, 0]):
+        pass
+    else:
+        result.append(h_eq(b[:, 0], a[:, 0]))
+    
+    if not np.any(a[:, 1]):
+        pass
+    else:
+        result.append(h_eq(b[:, 1], a[:, 1]))
+        
+    if not np.any(a[:, 2]):
+        pass
+    else:
+        result.append(h_eq(b[:, 2], a[:, 2]))
+        
+    # print(result, np.all(result))
+    result = result
+    # result = np.logical_or(a, b)
+    if np.all(result): return True
     return False
 
 
@@ -78,9 +116,9 @@ def do_morph(photo, fl, fl_type, wild_point_loc):
                 
                 for col in range(width_limit, width - width_limit):
                     if fit(photo[row_start:row_finish, col - width_limit:col + 2, channel]): ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1, channel] = 255
-                    else: ar_to_return[row, col, channel] = 0
+                    else: ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1, channel] = 0
                         
-    elif fl_type == 'fit':
+    elif fl_type == 'hit':
         print('HIT start')
         for channel in range(channels):
             for row in range(height_limit, height - height_limit):
@@ -98,10 +136,14 @@ def do_morph(photo, fl, fl_type, wild_point_loc):
 ################################################
 photo_or = Image.open("Photos\\MyART.webp")
 
+
+# ImageShow.WindowsViewer.format = "webp"
+
+
 fl = np.array([
-    [1, 1, 1],
-    [0, 0, 0],
-    [0, 0, 0],
+    [0, 1, 0],
+    [0, 1, 0],
+    [0, 1, 0],
     ])
 
 wild_point_loc = (1, 1)
