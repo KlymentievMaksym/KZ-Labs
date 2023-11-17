@@ -3,10 +3,45 @@ from PIL import Image
 import os
 import datetime as dtime
 
+def eq(ar1, ar2):
+    a1, a2, a3 = ar1
+    b1, b2, b3 = ar2
+    
+    lim1 = (a1 and b1 or not b1)
+    lim2 = (a2 and b2 or not b2)
+    lim3 = (a3 and b3 or not b3)
+    
+    # print(a1, a2, a3, lim1, lim2, lim3)
+    # print(b1, b2, b3)
+    
+    if lim1 and lim2 and lim3: return True
+    return False
 
 def fit(ar3x3):
-    print(ar3x3, fl, np.all(ar3x3 == fl))
-    if np.all(ar3x3 == fl): return True
+    # print(ar3x3, fl, np.all(ar3x3 == fl))
+    a = np.equal(1, fl)
+    b = np.equal(255, ar3x3)
+    # result = []
+    
+    # if not np.any(a[:, 0]):
+    #     pass
+    # else:
+    #     result.append(eq(a[:, 0], b[:, 0]))
+    
+    # if not np.any(a[:, 1]):
+    #     pass
+    # else:
+    #     result.append(eq(a[:, 1], b[:, 1]))
+        
+    # if not np.any(a[:, 2]):
+    #     pass
+    # else:
+    #     result.append(eq(a[:, 2], b[:, 2]))
+        
+    # print(result, np.all(result))
+    
+    result = np.logical_or(a, b)
+    if np.all(result): return True
     return False
 
 
@@ -17,8 +52,8 @@ def hit(ar3x3):
 
 def do_morph(photo, fl, fl_type, wild_point_loc):
     
-    ar_to_return = np.zeros_like(photo)
-    ar_to_return[...] = 255 
+    ar_to_return = photo.copy()
+    #ar_to_return[...] = 255 
     
     height, width, channels = photo.shape
     height_fl, width_fl = fl.shape
@@ -64,8 +99,8 @@ def do_morph(photo, fl, fl_type, wild_point_loc):
 photo_or = Image.open("Photos\\MyART.webp")
 
 fl = np.array([
-    [0, 255, 0],
-    [0, 255, 0],
+    [1, 1, 1],
+    [0, 0, 0],
     [0, 0, 0],
     ])
 
