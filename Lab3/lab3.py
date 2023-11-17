@@ -150,13 +150,14 @@ wild_point_loc = (1, 1)
 
 # print(fl[wild_point_loc])
 
-fl_type = 'fit' # 'fit', 'hit'
+fl_types = np.array(['fit', 'hit']) # ['fit', 'hit']
 ################################################
 photo = np.array(photo_or)
 
-tmp_ar = do_morph(photo, fl, fl_type, wild_point_loc)
-
-photo = Image.fromarray(tmp_ar)
+for fl_type in fl_types:
+    photo = do_morph(photo, fl, fl_type, wild_point_loc)
+    
+photo = Image.fromarray(photo)
 ################################################
 try:
     os.mkdir('Results\\')
