@@ -3,6 +3,7 @@ from PIL import Image, ImageShow
 import os
 import datetime as dtime
 
+
 def eq(ar1, ar2):
     a1, a2, a3 = ar1
     b1, b2, b3 = ar2
@@ -100,14 +101,14 @@ def do_morph(photo, fl, fl_type, wild_point_loc, not_rgb=False):
         
     height_fl, width_fl = fl.shape
     
-    print(height, width, channels)
+    # print(height, width, channels)
     
     height_limit = height_fl - 2
     width_limit = width_fl - 2
     
-    print(height_fl, width_fl, height_limit, width_limit)
+    # print(height_fl, width_fl, height_limit, width_limit)
     
-    print(fl)
+    # print(fl)
 
     
     if fl_type == 'fit':
@@ -147,7 +148,7 @@ def do_morph(photo, fl, fl_type, wild_point_loc, not_rgb=False):
 
 
 ################################################
-# photo_or = Image.open("Photos\\MyART.webp")
+photo_or = Image.open("Photos\\MyART.webp")
 
 
 ImageShow.WindowsViewer.format = "webp"
@@ -161,20 +162,30 @@ fl = np.array([
 
 wild_point_loc = (0, 1)
 
-fl_types = np.array(['fit', 'it']) # ['fit', 'hit']
+fl_types = np.array(['hitmfit', 'it']) # ['fit', 'hit']
 ################################################
-# photo = np.array(photo_or)
+photo = np.array(photo_or)
 
-photo = np.zeros((20, 20))
-photo[:, :] = 255
-photo[3:6, 2:5] = 0
-photo[5:10, 4:8] = 0
+# photo = np.zeros((20, 20))
+# photo[:, :] = 255
+# photo[3:6, 2:5] = 0
+# photo[5:10, 4:8] = 0
 
+# photo = rgb_to_halftone(photo)
 
 for fl_type in fl_types:
-    photo = do_morph(photo, fl, fl_type, wild_point_loc)
+    if fl_type == 'hitmfit':
+        hits = do_morph(photo, fl, 'hit', wild_point_loc)
+        fits = do_morph(photo, fl, 'fit', wild_point_loc)
+        photo = hits-fits # ).astype(np.uint8)
+        # photo[photo==0] = 255
+        photo[photo==1] = 255
+    else:
+        photo = do_morph(photo, fl, fl_type, wild_point_loc)
 
-    
+
+# print(photo)
+
 photo = Image.fromarray(photo)
 ################################################
 try:
