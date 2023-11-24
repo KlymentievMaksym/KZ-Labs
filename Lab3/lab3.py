@@ -36,7 +36,7 @@ def h_eq(ar1, ar2):
 def fit(ar3x3):
     # print(ar3x3, fl, np.all(ar3x3 == fl))
     a = np.equal(1, fl)
-    b = np.equal(255, ar3x3)
+    b = np.equal(0, ar3x3)
     result = []
     
     if not np.any(a[:, 0]):
@@ -63,7 +63,7 @@ def fit(ar3x3):
 
 def hit(ar3x3):
     a = np.equal(1, fl)
-    b = np.equal(255, ar3x3)
+    b = np.equal(0, ar3x3)
     result = []
     
     if not np.any(a[:, 0]):
@@ -88,12 +88,16 @@ def hit(ar3x3):
     return False
 
 
-def do_morph(photo, fl, fl_type, wild_point_loc):
-    
+def do_morph(photo, fl, fl_type, wild_point_loc, not_rgb=False):
     ar_to_return = photo.copy()
     #ar_to_return[...] = 255 
-    
-    height, width, channels = photo.shape
+    try:
+        height, width, channels = photo.shape
+    except ValueError:
+        height, width = photo.shape
+        not_rgb = True
+        channels = 1
+        
     height_fl, width_fl = fl.shape
     
     print(height, width, channels)
@@ -115,8 +119,12 @@ def do_morph(photo, fl, fl_type, wild_point_loc):
                 row_finish = row + 2
                 
                 for col in range(width_limit, width - width_limit):
-                    if fit(photo[row_start:row_finish, col - width_limit:col + 2, channel]): ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1, channel] = 255
-                    else: ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1, channel] = 0
+                    if not_rgb:
+                        if fit(photo[row_start:row_finish, col - width_limit:col + 2]): ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1] = 0
+                        else: ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1] = 255
+                    else:
+                        if fit(photo[row_start:row_finish, col - width_limit:col + 2, channel]): ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1, channel] = 0
+                        else: ar_to_return[row + wild_point_loc[0]-1, col + wild_point_loc[1]-1, channel] = 255
                         
     elif fl_type == 'hit':
         print('HIT start')
@@ -127,17 +135,22 @@ def do_morph(photo, fl, fl_type, wild_point_loc):
                 row_finish = row + 2
                 
                 for col in range(width_limit, width - width_limit):
-                    if hit(photo[row_start:row_finish, col - width_limit:col + 2, channel]): ar_to_return[row, col, channel] = 255
-                    else: ar_to_return[row, col, channel] = 0
+                    if not_rgb:
+                        if hit(photo[row_start:row_finish, col - width_limit:col + 2]): ar_to_return[row, col] = 0
+                        else: ar_to_return[row, col] = 255
+                    else:
+                        if hit(photo[row_start:row_finish, col - width_limit:col + 2, channel]): ar_to_return[row, col, channel] = 0
+                        else: ar_to_return[row, col, channel] = 255
+                    
     
     return ar_to_return
 
 
 ################################################
-photo_or = Image.open("Photos\\MyART.webp")
+# photo_or = Image.open("Photos\\MyART.webp")
 
 
-# ImageShow.WindowsViewer.format = "webp"
+ImageShow.WindowsViewer.format = "webp"
 
 
 fl = np.array([
@@ -146,16 +159,21 @@ fl = np.array([
     [0, 1, 0],
     ])
 
-wild_point_loc = (1, 1)
+wild_point_loc = (0, 1)
 
-# print(fl[wild_point_loc])
-
-fl_types = np.array(['fit', 'hit']) # ['fit', 'hit']
+fl_types = np.array(['fit', 'it']) # ['fit', 'hit']
 ################################################
-photo = np.array(photo_or)
+# photo = np.array(photo_or)
+
+photo = np.zeros((20, 20))
+photo[:, :] = 255
+photo[3:6, 2:5] = 0
+photo[5:10, 4:8] = 0
+
 
 for fl_type in fl_types:
     photo = do_morph(photo, fl, fl_type, wild_point_loc)
+
     
 photo = Image.fromarray(photo)
 ################################################
@@ -165,5 +183,5 @@ except FileExistsError:
     pass
 
 photo.show()
-photo.save('Results\\test_result_#' + str(dtime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")) + '.webp')
+photo.save('Results\\test_result_#' + str(dtime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")) + fl_types[0] + fl_types[1] +'.webp')
 print('\nDone!')
