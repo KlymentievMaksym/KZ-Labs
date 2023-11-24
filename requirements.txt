@@ -1,0 +1,7 @@
+colorama==0.4.6
+llvmlite==0.41.1
+numba==0.58.1
+numba-progress==1.1.0
+numpy==1.26.0
+Pillow==10.0.1
+tqdm==4.66.1
