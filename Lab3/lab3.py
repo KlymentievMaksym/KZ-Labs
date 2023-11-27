@@ -3,7 +3,13 @@ from PIL import Image, ImageShow
 import os
 import datetime as dtime
 
+from pprint import pprint
+from fnmatch import fnmatch
+# from tqdm import tqdm
+from numba import njit
+# from numba_progress import ProgressBar
 
+@njit(nogil=True)
 def eq(ar1, ar2):
     a1, a2, a3 = ar1
     b1, b2, b3 = ar2
@@ -18,7 +24,7 @@ def eq(ar1, ar2):
     if not lim1 or not lim2 or not lim3: return False
     return True
 
-
+@njit(nogil=True)
 def h_eq(ar1, ar2):
     a1, a2, a3 = ar1
     b1, b2, b3 = ar2
@@ -33,7 +39,7 @@ def h_eq(ar1, ar2):
     if lim1 or lim2 or lim3: return True
     return False
 
-
+@njit(nogil=True)
 def fit(ar3x3):
     # print(ar3x3, fl, np.all(ar3x3 == fl))
     a = np.equal(1, fl)
@@ -58,10 +64,20 @@ def fit(ar3x3):
     # print(result, np.all(result))
     
     # result = np.logical_or(a, b)
-    if np.all(result): return True
+    is_true1 = False
+    is_true2 = False
+    is_true3 = False
+    
+    for boolean in result:
+        if boolean: is_true1 = True
+        elif is_true1 and boolean: is_true2 = True
+        elif is_true1 and is_true2 and boolean: is_true3 = True
+        
+    
+    if is_true1 and is_true2 and is_true3: return True
     return False
 
-
+@njit(nogil=True)
 def hit(ar3x3):
     a = np.equal(1, fl)
     b = np.equal(0, ar3x3)
@@ -83,21 +99,30 @@ def hit(ar3x3):
         result.append(h_eq(b[:, 2], a[:, 2]))
         
     # print(result, np.all(result))
-    result = result
+    # result = result
     # result = np.logical_or(a, b)
-    if np.all(result): return True
+    is_true = False
+    
+    for boolean in result:
+        if boolean: is_true = True
+    
+    if is_true: return True
     return False
 
-
+@njit(nogil=True)
 def do_morph(photo, fl, fl_type, wild_point_loc, not_rgb=False):
     ar_to_return = photo.copy()
     #ar_to_return[...] = 255 
-    try:
-        height, width, channels = photo.shape
-    except ValueError:
-        height, width = photo.shape
-        not_rgb = True
-        channels = 1
+    
+    tupl = ar_to_return.shape
+    # print(len(tupl))
+    
+    # if len(tupl) == 3:
+    height, width, channels = photo.shape
+    # else:
+        # height, width = photo.shape
+        # not_rgb = True
+        # channels = 1
         
     height_fl, width_fl = fl.shape
     
@@ -148,21 +173,21 @@ def do_morph(photo, fl, fl_type, wild_point_loc, not_rgb=False):
 
 
 ################################################
-photo_or = Image.open("Photos\\MyART.webp")
+photo_or = Image.open("Photos\\MyART1.jpg")
 
 
 ImageShow.WindowsViewer.format = "webp"
 
 
 fl = np.array([
-    [0, 1, 0],
-    [0, 1, 0],
-    [0, 1, 0],
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
     ])
 
 wild_point_loc = (0, 1)
 
-fl_types = np.array(['hitmfit', 'it']) # ['fit', 'hit']
+fl_types = np.array(['fit', 'it']) # ['fit', 'hit']
 ################################################
 photo = np.array(photo_or)
 
