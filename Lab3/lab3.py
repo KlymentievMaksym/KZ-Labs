@@ -39,7 +39,7 @@ def h_eq(ar1, ar2):
     if lim1 or lim2 or lim3: return True
     return False
 
-@njit(nogil=True)
+# @njit(nogil=True)
 def fit(ar3x3):
     # print(ar3x3, fl, np.all(ar3x3 == fl))
     a = np.equal(1, fl)
@@ -64,20 +64,10 @@ def fit(ar3x3):
     # print(result, np.all(result))
     
     # result = np.logical_or(a, b)
-    is_true1 = False
-    is_true2 = False
-    is_true3 = False
-    
-    for boolean in result:
-        if boolean: is_true1 = True
-        elif is_true1 and boolean: is_true2 = True
-        elif is_true1 and is_true2 and boolean: is_true3 = True
-        
-    
-    if is_true1 and is_true2 and is_true3: return True
+    if np.all(result): return True
     return False
 
-@njit(nogil=True)
+# @njit(nogil=True)
 def hit(ar3x3):
     a = np.equal(1, fl)
     b = np.equal(0, ar3x3)
@@ -99,17 +89,12 @@ def hit(ar3x3):
         result.append(h_eq(b[:, 2], a[:, 2]))
         
     # print(result, np.all(result))
-    # result = result
+    result = result
     # result = np.logical_or(a, b)
-    is_true = False
-    
-    for boolean in result:
-        if boolean: is_true = True
-    
-    if is_true: return True
+    if np.all(result): return True
     return False
 
-@njit(nogil=True)
+# @njit(nogil=True)
 def do_morph(photo, fl, fl_type, wild_point_loc, not_rgb=False):
     ar_to_return = photo.copy()
     #ar_to_return[...] = 255 
