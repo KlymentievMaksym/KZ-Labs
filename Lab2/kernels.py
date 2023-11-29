@@ -10,9 +10,11 @@ def ZSUv():
     #     [0, 0, 0, 0, 10],
     #     [0, 0, 0, 10, 20],
     #     [0, 0, 10, 20, 30]
-    #     ], dtype=np.float32)
-    kernel = np.zeros((20, 20), dtype=np.float32)
-    kernel[-1, -1] = 1
+    # #     ], dtype=np.float32)
+    # kernel = np.zeros((20, 20), dtype=np.float32)
+    # kernel[-1, -1] = 1
+    kernel = np.zeros((41, 41))
+    kernel[0, 9] = 1
     # print(kernel)
     return kernel
 
