@@ -126,7 +126,7 @@ def norm_noise_color(image, mean=0, var=0.1, a=0.5):
     return noisy #.astype(np.uint8)
 
 @njit(nogil=True)
-def box_average_color(image):
+def box_average_color(image, filter_size=(9, 9)):
     '''
     Removes noise from color image 
     
@@ -137,7 +137,7 @@ def box_average_color(image):
     res_image = np.zeros_like(image).astype(np.float32)
     height, width, channels = image.shape
    
-    height_fl, width_fl = (3, 3)
+    height_fl, width_fl = filter_size
     
     height_limit = height_fl - 2
     width_limit = width_fl - 2
@@ -151,7 +151,7 @@ def box_average_color(image):
     return res_image
 
 @njit(nogil=True)
-def box_average_gray(image):
+def box_average_gray(image, filter_size=(9, 9)):
     '''
     Removes noise from gray image 
     
@@ -162,7 +162,7 @@ def box_average_gray(image):
     res_image = np.zeros_like(image).astype(np.float32)
     height, width = image.shape
    
-    height_fl, width_fl = (3, 3)
+    height_fl, width_fl = filter_size
     
     height_limit = height_fl - 2
     width_limit = width_fl - 2
@@ -175,7 +175,7 @@ def box_average_gray(image):
     return res_image
 
 @njit(nogil=True)
-def median_color(image):
+def median_color(image, filter_size=(9, 9)):
     '''
     Removes noise from color image 
     
@@ -186,7 +186,7 @@ def median_color(image):
     res_image = np.zeros_like(image).astype(np.float32)
     height, width, channels = image.shape
    
-    height_fl, width_fl = (3, 3)
+    height_fl, width_fl = filter_size
     
     height_limit = height_fl - 2
     width_limit = width_fl - 2
@@ -200,7 +200,7 @@ def median_color(image):
     return res_image
 
 @njit(nogil=True)
-def median_gray(image):
+def median_gray(image, filter_size=(9, 9)):
     '''
     Removes noise from gray image 
     
@@ -211,7 +211,7 @@ def median_gray(image):
     res_image = np.zeros_like(image).astype(np.float32)
     height, width = image.shape
    
-    height_fl, width_fl = (3, 3)
+    height_fl, width_fl = filter_size
     
     height_limit = height_fl - 2
     width_limit = width_fl - 2
@@ -288,7 +288,7 @@ except FileNotFoundError:
     if not os.path.exists('results\\'):
         os.mkdir('results\\')
 
-with ProgressBar(total=8*len(os.listdir('photos\\'))+9) as progress:
+with ProgressBar(total=17*len(os.listdir('photos\\'))) as progress:
     for item in os.listdir('photos\\'):
         image = np.array(Image.open('photos\\'+item))#, 0)
         # print(image.shape)
@@ -297,15 +297,15 @@ with ProgressBar(total=8*len(os.listdir('photos\\'))+9) as progress:
             progress.update(1)
             norm_noise_img = norm_noise_color(image, mean=0, var=10, a=0.1)
             progress.update(1)
-            sp_noise_img_box = box_average_color(sp_noise_img)
+            sp_noise_img_box = box_average_color(sp_noise_img, filter_size=(6, 6))
             progress.update(1)
-            sp_noise_img_med = median_color(sp_noise_img)
+            sp_noise_img_med = median_color(sp_noise_img, filter_size=(6, 6))
             progress.update(1)
             sp_noise_img_wmed = weight_median_color(sp_noise_img)
             progress.update(1)
-            norm_noise_img_box = box_average_color(norm_noise_img)
+            norm_noise_img_box = box_average_color(norm_noise_img, filter_size=(6, 6))
             progress.update(1)
-            norm_noise_img_med = median_color(norm_noise_img)
+            norm_noise_img_med = median_color(norm_noise_img, filter_size=(6, 6))
             progress.update(1)
             norm_noise_img_wmed = weight_median_color(norm_noise_img)
             progress.update(1)
@@ -314,15 +314,15 @@ with ProgressBar(total=8*len(os.listdir('photos\\'))+9) as progress:
             progress.update(1)
             norm_noise_img = norm_noise_gray(image, mean=0, var=10, a=0.1)
             progress.update(1)
-            sp_noise_img_box = box_average_gray(sp_noise_img)
+            sp_noise_img_box = box_average_gray(sp_noise_img, filter_size=(9, 9))
             progress.update(1)
-            sp_noise_img_med = median_gray(sp_noise_img)
+            sp_noise_img_med = median_gray(sp_noise_img, filter_size=(9, 9))
             progress.update(1)
             sp_noise_img_wmed = weight_median_gray(sp_noise_img)
             progress.update(1)
-            norm_noise_img_box = box_average_gray(norm_noise_img)
+            norm_noise_img_box = box_average_gray(norm_noise_img, filter_size=(9, 9))
             progress.update(1)
-            norm_noise_img_med = median_gray(norm_noise_img)
+            norm_noise_img_med = median_gray(norm_noise_img, filter_size=(9, 9))
             progress.update(1)
             norm_noise_img_wmed = weight_median_gray(norm_noise_img)
             progress.update(1)
