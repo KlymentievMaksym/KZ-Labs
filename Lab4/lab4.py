@@ -100,7 +100,7 @@ def norm_noise_gray(image, mean=0, var=0.1, a=0.5):
     noisy = noisy-np.min(noisy)
     noisy = 255*(noisy/np.max(noisy))
     
-    return noisy.astype(np.uint8)
+    return noisy #.astype(np.uint8)
 
 # @njit(nogil=True)
 def norm_noise_color(image, mean=0, var=0.1, a=0.5):
@@ -123,7 +123,7 @@ def norm_noise_color(image, mean=0, var=0.1, a=0.5):
     noisy = noisy-np.min(noisy)
     noisy = 255*(noisy/np.max(noisy))
     
-    return noisy.astype(np.uint8)
+    return noisy #.astype(np.uint8)
 
 @njit(nogil=True)
 def box_average_color(image):
@@ -133,6 +133,7 @@ def box_average_color(image):
     image: Numpy 2D array
     returns: Numpy 2D array
     '''    
+    image = image.astype(np.float32)
     res_image = np.zeros_like(image).astype(np.float32)
     height, width, channels = image.shape
    
@@ -157,6 +158,7 @@ def box_average_gray(image):
     image: Numpy 2D array
     returns: Numpy 2D array
     '''    
+    image = image.astype(np.float32)
     res_image = np.zeros_like(image).astype(np.float32)
     height, width = image.shape
    
@@ -180,6 +182,7 @@ def median_color(image):
     image: Numpy 2D array
     returns: Numpy 2D array
     '''
+    image = image.astype(np.float32)
     res_image = np.zeros_like(image).astype(np.float32)
     height, width, channels = image.shape
    
@@ -204,6 +207,7 @@ def median_gray(image):
     image: Numpy 2D array
     returns: Numpy 2D array
     '''
+    image = image.astype(np.float32)
     res_image = np.zeros_like(image).astype(np.float32)
     height, width = image.shape
    
@@ -227,9 +231,10 @@ def weight_median_color(image):
     image: Numpy 2D array
     returns: Numpy 2D array
     '''    
-    
+    image = image.astype(np.float32)
     res_image = np.zeros_like(image).astype(np.float32)
     m_filter = np.array([[1, 2, 1],[2, 4, 2],[1, 2, 1]])*1/16
+    # print(m_filter)
     
     height, width, channels = image.shape
     
@@ -254,7 +259,7 @@ def weight_median_gray(image):
     image: Numpy 2D array
     returns: Numpy 2D array
     '''    
-    
+    image = image.astype(np.float32)
     res_image = np.zeros_like(image).astype(np.float32)
     m_filter = np.array([[1, 2, 1],[2, 4, 2],[1, 2, 1]])*1/16
     
@@ -322,7 +327,7 @@ with ProgressBar(total=8*len(os.listdir('photos\\'))+9) as progress:
             norm_noise_img_wmed = weight_median_gray(norm_noise_img)
             progress.update(1)
             
-        sp_img = Image.fromarray(sp_noise_img.astype(np.uint8))
+        sp_img = Image.fromarray(sp_noise_img)#.astype(np.uint8))
         progress.update(1)
         norm_img = Image.fromarray(norm_noise_img.astype(np.uint8))#.astype(np.uint8))
         progress.update(1)
