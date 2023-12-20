@@ -196,7 +196,7 @@ def median_color(image, filter_size=(9, 9)):
             row_start = row - height_limit
             row_finish = row + 2
             for col in range(width_limit, width - width_limit):
-                res_image[row, col, channel] = np.mean(image[row_start:row_finish, col - width_limit:col + 2, channel])
+                res_image[row, col, channel] = np.median(image[row_start:row_finish, col - width_limit:col + 2, channel])
     return res_image
 
 @njit(nogil=True)
@@ -220,7 +220,7 @@ def median_gray(image, filter_size=(9, 9)):
         row_start = row - height_limit
         row_finish = row + 2
         for col in range(width_limit, width - width_limit):
-            res_image[row, col] = np.mean(image[row_start:row_finish, col - width_limit:col + 2])
+            res_image[row, col] = np.median(image[row_start:row_finish, col - width_limit:col + 2])
     return res_image
 
 @njit(nogil=True)
