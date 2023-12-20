@@ -223,6 +223,14 @@ def median_gray(image, filter_size=(9, 9)):
             res_image[row, col] = np.median(image[row_start:row_finish, col - width_limit:col + 2])
     return res_image
 
+
+@njit(nogil=True)
+def scale(filtered_ar1):
+    maximum = np.max(filtered_ar1)
+    minimum = np.min(filtered_ar1)
+    filtered_ar1 = (255*(filtered_ar1 - minimum)/maximum).astype(np.uint8)#np.ptp(filtered_ar1)
+    return filtered_ar1
+
 @njit(nogil=True)
 def weight_median_color(image):
     '''
@@ -249,7 +257,7 @@ def weight_median_color(image):
             row_finish = row + 2
             for col in range(width_limit, width - width_limit):
                 res_image[row, col, channel] = np.median(image[row_start:row_finish, col - width_limit:col + 2, channel]*m_filter)
-    return res_image
+    return scale(res_image)
 
 @njit(nogil=True)
 def weight_median_gray(image):
@@ -275,7 +283,7 @@ def weight_median_gray(image):
         row_finish = row + 2
         for col in range(width_limit, width - width_limit):
             res_image[row, col] = np.median(image[row_start:row_finish, col - width_limit:col + 2]*m_filter)
-    return res_image
+    return scale(res_image)
 
 
 
