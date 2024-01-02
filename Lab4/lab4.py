@@ -41,6 +41,7 @@ import os
 
 from numba import njit
 from numba_progress import ProgressBar
+from converter import hsv2rgb, rgb2hsv, rgb_to_hsv, hsv_to_rgb
 
 # @njit(nogil=True)
 def sp_noise_gray(image, prob=0.03):
@@ -300,7 +301,7 @@ except FileNotFoundError:
     if not os.path.exists('results\\'):
         os.mkdir('results\\')
 
-with ProgressBar(total=17*len(os.listdir('photos\\'))) as progress:
+with ProgressBar(total=19*len(os.listdir('photos\\'))) as progress:
     for item in os.listdir('photos\\'):
         image = np.array(Image.open('photos\\'+item))#.convert('HSV'))#, 0)
         # image = image.convert('HSV')
@@ -309,9 +310,33 @@ with ProgressBar(total=17*len(os.listdir('photos\\'))) as progress:
             # sp noise
             sp_noise_img = sp_noise_color(image,0.07)
             progress.update(1)
+            # hsv img
+            sp_hsv_img = rgb2hsv(sp_noise_img)
+            progress.update(1)
+            # rgb img
+            sp_rgb_img = hsv2rgb(rgb2hsv(sp_noise_img))
+            progress.update(1)
+            # # hsv img
+            # sp_hsv_img_ns = rgb_to_hsv(sp_noise_img)
+            # progress.update(1)
+            # # rgb img
+            # sp_rgb_img_ns = hsv_to_rgb(rgb_to_hsv(sp_noise_img))
+            # progress.update(1)
             # norm noise
             norm_noise_img = norm_noise_color(image, mean=0, var=10, a=0.1)
             progress.update(1)
+            # # hsv img
+            # norm_hsv_img = rgb2hsv(norm_noise_img)
+            # progress.update(1)
+            # # rgb img
+            # norm_rgb_img = hsv2rgb(rgb2hsv(norm_noise_img))
+            # progress.update(1)
+            # # hsv img
+            # norm_hsv_img_ns = rgb_to_hsv(norm_noise_img)
+            # progress.update(1)
+            # # rgb img
+            # norm_rgb_img_ns = hsv_to_rgb(rgb_to_hsv(norm_noise_img))
+            # progress.update(1)
             # box for sp
             sp_noise_img_box = box_average_color(sp_noise_img, filter_size=(6, 6))
             progress.update(1)
@@ -330,6 +355,24 @@ with ProgressBar(total=17*len(os.listdir('photos\\'))) as progress:
             # wmed for norm
             norm_noise_img_wmed = weight_median_color(norm_noise_img)
             progress.update(1)
+            
+            sp_hsv_img = Image.fromarray(sp_hsv_img)
+            sp_rgb_img = Image.fromarray(sp_rgb_img)
+            # sp_hsv_img_ns = Image.fromarray(sp_hsv_img_ns)
+            # sp_rgb_img_ns = Image.fromarray(sp_rgb_img_ns)
+            # norm_hsv_img = Image.fromarray(norm_hsv_img)
+            # norm_rgb_img = Image.fromarray(norm_rgb_img)
+            # norm_hsv_img_ns = Image.fromarray(norm_hsv_img_ns)
+            # norm_rgb_img_ns = Image.fromarray(norm_rgb_img_ns)
+            
+            sp_hsv_img.save('results\\'+item+'_sp_hsv_'+item)
+            sp_rgb_img.save('results\\'+item+'_sp_rgb_'+item)
+            # sp_hsv_img_ns.save('results\\'+item+'_sp_hsv_ns_'+item)
+            # sp_rgb_img_ns.save('results\\'+item+'_sp_rgb_ns_'+item)
+            # norm_hsv_img.save('results\\'+item+'_norm_hsv_'+item)
+            # norm_rgb_img.save('results\\'+item+'_norm_rgb_'+item)
+            # norm_hsv_img_ns.save('results\\'+item+'_norm_hsv_ns_'+item)
+            # norm_rgb_img_ns.save('results\\'+item+'_norm_rgb_ns_'+item)
         else:
             # sp noise
             sp_noise_img = sp_noise_gray(image,0.07)
