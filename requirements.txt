@@ -5,3 +5,4 @@ numba-progress==1.1.0
 numpy==1.26.0
 Pillow==10.0.1
 tqdm==4.66.1
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
