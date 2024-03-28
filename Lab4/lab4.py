@@ -10,7 +10,6 @@
 # 1.2 Завдання
 # Виконати наступнi кроки:
 # 1. Обрати декiлька (3+) зображень, без вираженого шуму.
-# Рис. 1: Приклад зображення.
 # 2. Для кожного зображення додати наступнi типи шуму:
 # • Salt-Pepper (Iмпульсний шум)
 # • Gaussian noise (Нормальний шум)
@@ -40,6 +39,11 @@ import numpy as np
 import random
 import os
 
+from numba import njit
+from numba_progress import ProgressBar
+from converter import hsv2rgb, rgb2hsv, rgb_to_hsv, hsv_to_rgb
+
+# @njit(nogil=True)
 def sp_noise_gray(image, prob=0.03):
     '''
     Add salt and pepper noise to a gray image [0,255]
@@ -58,6 +62,7 @@ def sp_noise_gray(image, prob=0.03):
                 image[i,j] = 255
     return image
 
+# @njit(nogil=True)
 def sp_noise_color(image, prob=0.03, white=[255,255,255], black=[0,0,0]):
     '''
     Add salt and pepper noise to a color image
@@ -76,6 +81,7 @@ def sp_noise_color(image, prob=0.03, white=[255,255,255], black=[0,0,0]):
                 image[i,j,:] = white
     return image
 
+# @njit(nogil=True)
 def norm_noise_gray(image, mean=0, var=0.1, a=0.5):
     '''
     Add gaussian noise to gray image 
@@ -95,8 +101,9 @@ def norm_noise_gray(image, mean=0, var=0.1, a=0.5):
     noisy = noisy-np.min(noisy)
     noisy = 255*(noisy/np.max(noisy))
     
-    return noisy.astype(np.uint8)
+    return noisy #.astype(np.uint8)
 
+# @njit(nogil=True)
 def norm_noise_color(image, mean=0, var=0.1, a=0.5):
     '''
     Add gaussian noise to color image 
@@ -117,7 +124,173 @@ def norm_noise_color(image, mean=0, var=0.1, a=0.5):
     noisy = noisy-np.min(noisy)
     noisy = 255*(noisy/np.max(noisy))
     
-    return noisy.astype(np.uint8)
+    return noisy #.astype(np.uint8)
+
+@njit(nogil=True)
+def box_average_color(image, filter_size=(9, 9)):
+    '''
+    Removes noise from color image 
+    
+    image: Numpy 2D array
+    returns: Numpy 2D array
+    '''    
+    image = image.astype(np.float32)
+    res_image = np.zeros_like(image).astype(np.float32)
+    height, width, channels = image.shape
+   
+    height_fl, width_fl = filter_size
+    
+    height_limit = height_fl - 2
+    width_limit = width_fl - 2
+    
+    for channel in range(channels):
+        for row in range(height_limit, height - height_limit):
+            row_start = row - height_limit
+            row_finish = row + 2
+            for col in range(width_limit, width - width_limit):
+                res_image[row, col, channel] = np.mean(image[row_start:row_finish, col - width_limit:col + 2, channel])
+    return res_image
+
+@njit(nogil=True)
+def box_average_gray(image, filter_size=(9, 9)):
+    '''
+    Removes noise from gray image 
+    
+    image: Numpy 2D array
+    returns: Numpy 2D array
+    '''    
+    image = image.astype(np.float32)
+    res_image = np.zeros_like(image).astype(np.float32)
+    height, width = image.shape
+   
+    height_fl, width_fl = filter_size
+    
+    height_limit = height_fl - 2
+    width_limit = width_fl - 2
+    
+    for row in range(height_limit, height - height_limit):
+        row_start = row - height_limit
+        row_finish = row + 2
+        for col in range(width_limit, width - width_limit):
+            res_image[row, col] = np.mean(image[row_start:row_finish, col - width_limit:col + 2])
+    return res_image
+
+@njit(nogil=True)
+def median_color(image, filter_size=(9, 9)):
+    '''
+    Removes noise from color image 
+    
+    image: Numpy 2D array
+    returns: Numpy 2D array
+    '''
+    image = image.astype(np.float32)
+    res_image = np.zeros_like(image).astype(np.float32)
+    height, width, channels = image.shape
+   
+    height_fl, width_fl = filter_size
+    
+    height_limit = height_fl - 2
+    width_limit = width_fl - 2
+    
+    for channel in range(channels):
+        for row in range(height_limit, height - height_limit):
+            row_start = row - height_limit
+            row_finish = row + 2
+            for col in range(width_limit, width - width_limit):
+                res_image[row, col, channel] = np.median(image[row_start:row_finish, col - width_limit:col + 2, channel])
+    return res_image
+
+@njit(nogil=True)
+def median_gray(image, filter_size=(9, 9)):
+    '''
+    Removes noise from gray image 
+    
+    image: Numpy 2D array
+    returns: Numpy 2D array
+    '''
+    image = image.astype(np.float32)
+    res_image = np.zeros_like(image).astype(np.float32)
+    height, width = image.shape
+   
+    height_fl, width_fl = filter_size
+    
+    height_limit = height_fl - 2
+    width_limit = width_fl - 2
+    
+    for row in range(height_limit, height - height_limit):
+        row_start = row - height_limit
+        row_finish = row + 2
+        for col in range(width_limit, width - width_limit):
+            res_image[row, col] = np.median(image[row_start:row_finish, col - width_limit:col + 2])
+    return res_image
+
+
+@njit(nogil=True)
+def scale(filtered_ar1):
+    maximum = np.max(filtered_ar1)
+    minimum = np.min(filtered_ar1)
+    filtered_ar1 = (255*(filtered_ar1 - minimum)/maximum).astype(np.uint8)#np.ptp(filtered_ar1)
+    # print(maximum, minimum)
+    return filtered_ar1
+
+@njit(nogil=True)
+def weight_median_color(image):
+    '''
+    Removes noise from color image 
+    
+    image: Numpy 2D array
+    returns: Numpy 2D array
+    '''    
+    # maximum = np.max(image)
+    # minimum = np.min(image)
+    # print(maximum, minimum)
+    image = image.astype(np.float32)
+    res_image = np.zeros_like(image).astype(np.float32)
+    m_filter = np.array([[1, 2, 1],[2, 4, 2],[1, 2, 1]])*1/16
+    # print(m_filter)
+    
+    height, width, channels = image.shape
+    
+    height_fl, width_fl = m_filter.shape
+    
+    height_limit = height_fl - 2
+    width_limit = width_fl - 2
+    
+    for channel in range(channels):
+        for row in range(height_limit, height - height_limit):
+            row_start = row - height_limit
+            row_finish = row + 2
+            for col in range(width_limit, width - width_limit):
+                res_image[row, col, channel] = np.median(image[row_start:row_finish, col - width_limit:col + 2, channel]*m_filter)
+    return scale(res_image)
+
+@njit(nogil=True)
+def weight_median_gray(image):
+    '''
+    Removes noise from gray image 
+    
+    image: Numpy 2D array
+    returns: Numpy 2D array
+    '''    
+    image = image.astype(np.float32)
+    res_image = np.zeros_like(image).astype(np.float32)
+    m_filter = np.array([[1, 2, 1],[2, 4, 2],[1, 2, 1]])*1/16
+    
+    height, width = image.shape
+    
+    height_fl, width_fl = m_filter.shape
+    
+    height_limit = height_fl - 2
+    width_limit = width_fl - 2
+    
+    for row in range(height_limit, height - height_limit):
+        row_start = row - height_limit
+        row_finish = row + 2
+        for col in range(width_limit, width - width_limit):
+            res_image[row, col] = np.median(image[row_start:row_finish, col - width_limit:col + 2]*m_filter)
+    return scale(res_image)
+
+
 
 try:
     os.listdir('photos\\')
@@ -127,19 +300,131 @@ except FileNotFoundError:
     os.mkdir('photos\\')
     if not os.path.exists('results\\'):
         os.mkdir('results\\')
+
+with ProgressBar(total=19*len(os.listdir('photos\\'))) as progress:
+    for item in os.listdir('photos\\'):
+        image = np.array(Image.open('photos\\'+item))#.convert('HSV'))#, 0)
+        # image = image.convert('HSV')
+        # print(image.shape)
+        if len(image.shape) >= 3:
+            # sp noise
+            sp_noise_img = sp_noise_color(image,0.07)
+            progress.update(1)
+            # hsv img
+            sp_hsv_img = rgb2hsv(sp_noise_img)
+            progress.update(1)
+            # rgb img
+            sp_rgb_img = hsv2rgb(rgb2hsv(sp_noise_img))
+            progress.update(1)
+            # # hsv img
+            # sp_hsv_img_ns = rgb_to_hsv(sp_noise_img)
+            # progress.update(1)
+            # # rgb img
+            # sp_rgb_img_ns = hsv_to_rgb(rgb_to_hsv(sp_noise_img))
+            # progress.update(1)
+            # norm noise
+            norm_noise_img = norm_noise_color(image, mean=0, var=10, a=0.1)
+            progress.update(1)
+            # # hsv img
+            # norm_hsv_img = rgb2hsv(norm_noise_img)
+            # progress.update(1)
+            # # rgb img
+            # norm_rgb_img = hsv2rgb(rgb2hsv(norm_noise_img))
+            # progress.update(1)
+            # # hsv img
+            # norm_hsv_img_ns = rgb_to_hsv(norm_noise_img)
+            # progress.update(1)
+            # # rgb img
+            # norm_rgb_img_ns = hsv_to_rgb(rgb_to_hsv(norm_noise_img))
+            # progress.update(1)
+            # box for sp
+            sp_noise_img_box = box_average_color(sp_noise_img, filter_size=(6, 6))
+            progress.update(1)
+            # med for sp
+            sp_noise_img_med = median_color(sp_noise_img, filter_size=(6, 6))
+            progress.update(1)
+            # wmed for sp
+            sp_noise_img_wmed = weight_median_color(sp_noise_img)
+            progress.update(1)
+            # box for norm
+            norm_noise_img_box = box_average_color(norm_noise_img, filter_size=(6, 6))
+            progress.update(1)
+            # med for norm
+            norm_noise_img_med = median_color(norm_noise_img, filter_size=(6, 6))
+            progress.update(1)
+            # wmed for norm
+            norm_noise_img_wmed = weight_median_color(norm_noise_img)
+            progress.update(1)
+            
+            sp_hsv_img = Image.fromarray(sp_hsv_img)
+            sp_rgb_img = Image.fromarray(sp_rgb_img)
+            # sp_hsv_img_ns = Image.fromarray(sp_hsv_img_ns)
+            # sp_rgb_img_ns = Image.fromarray(sp_rgb_img_ns)
+            # norm_hsv_img = Image.fromarray(norm_hsv_img)
+            # norm_rgb_img = Image.fromarray(norm_rgb_img)
+            # norm_hsv_img_ns = Image.fromarray(norm_hsv_img_ns)
+            # norm_rgb_img_ns = Image.fromarray(norm_rgb_img_ns)
+            
+            sp_hsv_img.save('results\\'+item+'_sp_hsv_'+item)
+            sp_rgb_img.save('results\\'+item+'_sp_rgb_'+item)
+            # sp_hsv_img_ns.save('results\\'+item+'_sp_hsv_ns_'+item)
+            # sp_rgb_img_ns.save('results\\'+item+'_sp_rgb_ns_'+item)
+            # norm_hsv_img.save('results\\'+item+'_norm_hsv_'+item)
+            # norm_rgb_img.save('results\\'+item+'_norm_rgb_'+item)
+            # norm_hsv_img_ns.save('results\\'+item+'_norm_hsv_ns_'+item)
+            # norm_rgb_img_ns.save('results\\'+item+'_norm_rgb_ns_'+item)
+        else:
+            # sp noise
+            sp_noise_img = sp_noise_gray(image,0.07)
+            progress.update(1)
+            # norm noise
+            norm_noise_img = norm_noise_gray(image, mean=0, var=10, a=0.1)
+            progress.update(1)
+            # box for sp
+            sp_noise_img_box = box_average_gray(sp_noise_img, filter_size=(9, 9))
+            progress.update(1)
+            # med for sp
+            sp_noise_img_med = median_gray(sp_noise_img, filter_size=(9, 9))
+            progress.update(1)
+            # wmed for sp
+            sp_noise_img_wmed = weight_median_gray(sp_noise_img)
+            progress.update(1)
+            # box for norm
+            norm_noise_img_box = box_average_gray(norm_noise_img, filter_size=(9, 9))
+            progress.update(1)
+            # med for norm
+            norm_noise_img_med = median_gray(norm_noise_img, filter_size=(9, 9))
+            progress.update(1)
+            # wmed for norm
+            norm_noise_img_wmed = weight_median_gray(norm_noise_img)
+            progress.update(1)
+            
+        sp_img = Image.fromarray(sp_noise_img)#.astype(np.uint8))
+        progress.update(1)
+        norm_img = Image.fromarray(norm_noise_img.astype(np.uint8))#.astype(np.uint8))
+        progress.update(1)
+        sp_noise_img_box = Image.fromarray(sp_noise_img_box.astype(np.uint8))
+        progress.update(1)
+        sp_noise_img_med = Image.fromarray(sp_noise_img_med.astype(np.uint8))
+        progress.update(1)
+        sp_noise_img_wmed = Image.fromarray(sp_noise_img_wmed.astype(np.uint8))
+        progress.update(1)
+        norm_noise_img_box = Image.fromarray(norm_noise_img_box.astype(np.uint8))
+        progress.update(1)
+        norm_noise_img_med = Image.fromarray(norm_noise_img_med.astype(np.uint8))
+        progress.update(1)
+        norm_noise_img_wmed = Image.fromarray(norm_noise_img_wmed.astype(np.uint8))
+        progress.update(1)
+        # sp_img.show()
+        # norm_img.show()
+        sp_img.save('results\\'+item+'_sp_'+item) #res_
+        norm_img.save('results\\'+item+'_norm_'+item) #res_
         
-for item in os.listdir('photos\\'):
-    image = np.array(Image.open('photos\\'+item))#, 0)
-    # print(image.shape)
-    if len(image.shape) == 3:
-        sp_noise_img = sp_noise_color(image,0.07)
-        norm_noise_img = norm_noise_color(image, mean=0, var=10, a=0.1)
-    else:
-        sp_noise_img = sp_noise_gray(image,0.07)
-        norm_noise_img = norm_noise_gray(image, mean=0, var=10, a=0.1)
-    sp_img = Image.fromarray(sp_noise_img)
-    norm_img = Image.fromarray(norm_noise_img.astype(np.uint8))
-    # sp_img.show()
-    # norm_img.show()
-    sp_img.save('results\\res_sp_'+item)
-    norm_img.save('results\\res_norm_'+item)
+        sp_noise_img_box.save('results\\'+item+'_res_sp_box_'+item)
+        sp_noise_img_med.save('results\\'+item+'_res_sp_med_'+item)
+        sp_noise_img_wmed.save('results\\'+item+'_res_sp_wmed_'+item)
+        
+        norm_noise_img_box.save('results\\'+item+'_res_norm_box_'+item)
+        norm_noise_img_med.save('results\\'+item+'_res_norm_med_'+item)
+        norm_noise_img_wmed.save('results\\'+item+'_res_norm_wmed_'+item)
+        progress.update(1)
